@@ -1,0 +1,264 @@
+version: ‘3.8’
+
+services:
+
+# Frontend Service
+
+frontend:
+build:
+context: ./frontend
+dockerfile: Dockerfile
+target: production
+container_name: wastesort-frontend
+ports:
+- “3000:80”
+environment:
+- REACT_APP_API_URL=http://localhost:5000/api
+- REACT_APP_SOCKET_URL=http://localhost:5000
+depends_on:
+- backend
+networks:
+- wastesort-network
+restart: unless-stopped
+labels:
+- “traefik.enable=true”
+- “traefik.http.routers.frontend.rule=Host(`wastesort.ai`)”
+- “traefik.http.services.frontend.loadbalancer.server.port=80”
+
+# Backend Service
+
+backend:
+build:
+context: ./backend
+dockerfile: Dockerfile
+container_name: wastesort-backend
+ports:
+- “5000:5000”
+environment:
+- NODE_ENV=production
+- PORT=5000
+- MONGODB_URI=mongodb://mongo:27017/wastesort-ai
+- REDIS_URL=redis://redis:6379
+- JWT_SECRET=${JWT_SECRET}
+- FRONTEND_URL=http://localhost:3000
+volumes:
+- backend_uploads:/app/uploads
+- backend_logs:/app/logs
+- ai_models:/app/models
+depends_on:
+- mongo
+- redis
+networks:
+- wastesort-network
+restart: unless-stopped
+healthcheck:
+test: [“CMD”, “curl”, “-f”, “http://localhost:5000/api/health”]
+interval: 30s
+timeout: 10s
+retries: 3
+start_period: 40s
+labels:
+- “traefik.enable=true”
+- “traefik.http.routers.backend.rule=Host(`api.wastesort.ai`)”
+- “traefik.http.services.backend.loadbalancer.server.port=5000”
+
+# MongoDB Database
+
+mongo:
+image: mongo:6.0
+container_name: wastesort-mongo
+ports:
+- “27017:27017”
+environment:
+- MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-admin}
+- MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-password}
+- MONGO_INITDB_DATABASE=wastesort-ai
+volumes:
+- mongo_data:/data/db
+- mongo_config:/data/configdb
+- ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+networks:
+- wastesort-network
+restart: unless-stopped
+command: [“mongod”, “–auth”]
+logging:
+driver: “json-file”
+options:
+max-size: “10m”
+max-file: “3”
+
+# Redis Cache
+
+redis:
+image: redis:7-alpine
+container_name: wastesort-redis
+ports:
+- “6379:6379”
+environment:
+- REDIS_PASSWORD=${REDIS_PASSWORD:-}
+volumes:
+- redis_data:/data
+- ./config/redis.conf:/etc/redis/redis.conf:ro
+networks:
+- wastesort-network
+restart: unless-stopped
+command: [“redis-server”, “/etc/redis/redis.conf”]
+healthcheck:
+test: [“CMD”, “redis-cli”, “ping”]
+interval: 30s
+timeout: 10s
+retries: 3
+
+# Nginx Reverse Proxy
+
+nginx:
+image: nginx:alpine
+container_name: wastesort-nginx
+ports:
+- “80:80”
+- “443:443”
+volumes:
+- ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+- ./nginx/conf.d:/etc/nginx/conf.d:ro
+- ./ssl:/etc/nginx/ssl:ro
+- nginx_logs:/var/log/nginx
+depends_on:
+- frontend
+- backend
+networks:
+- wastesort-network
+restart: unless-stopped
+healthcheck:
+test: [“CMD”, “wget”, “–quiet”, “–tries=1”, “–spider”, “http://localhost/health”]
+interval: 30s
+timeout: 10s
+retries: 3
+
+# Prometheus Monitoring
+
+prometheus:
+image: prom/prometheus:latest
+container_name: wastesort-prometheus
+ports:
+- “9090:9090”
+volumes:
+- ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+- prometheus_data:/prometheus
+networks:
+- wastesort-network
+restart: unless-stopped
+command:
+- ‘–config.file=/etc/prometheus/prometheus.yml’
+- ‘–storage.tsdb.path=/prometheus’
+- ‘–web.console.libraries=/etc/prometheus/console_libraries’
+- ‘–web.console.templates=/etc/prometheus/consoles’
+- ‘–storage.tsdb.retention.time=200h’
+- ‘–web.enable-lifecycle’
+
+# Grafana Dashboard
+
+grafana:
+image: grafana/grafana:latest
+container_name: wastesort-grafana
+ports:
+- “3001:3000”
+environment:
+- GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+- GF_USERS_ALLOW_SIGN_UP=false
+volumes:
+- grafana_data:/var/lib/grafana
+- ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+- ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+networks:
+- wastesort-network
+restart: unless-stopped
+depends_on:
+- prometheus
+
+# AI Model Server (Optional)
+
+ai-server:
+build:
+context: ./ai-server
+dockerfile: Dockerfile
+container_name: wastesort-ai-server
+ports:
+- “8000:8000”
+environment:
+- MODEL_PATH=/models
+- WORKERS=2
+- TIMEOUT=30
+volumes:
+- ai_models:/models:ro
+- ai_cache:/cache
+networks:
+- wastesort-network
+restart: unless-stopped
+deploy:
+resources:
+limits:
+memory: 2G
+reservations:
+memory: 1G
+healthcheck:
+test: [“CMD”, “curl”, “-f”, “http://localhost:8000/health”]
+interval: 30s
+timeout: 10s
+retries: 3
+
+# Backup Service
+
+backup:
+image: alpine:latest
+container_name: wastesort-backup
+volumes:
+- mongo_data:/backup/mongo:ro
+- redis_data:/backup/redis:ro
+- backend_uploads:/backup/uploads:ro
+- ./backups:/backups
+- ./scripts/backup.sh:/backup.sh:ro
+environment:
+- BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-0 2 * * *}
+- RETENTION_DAYS=${BACKUP_RETENTION:-7}
+networks:
+- wastesort-network
+restart: unless-stopped
+command: |
+sh -c “
+apk add –no-cache dcron tzdata curl &&
+echo ‘$${BACKUP_SCHEDULE} /backup.sh’ | crontab - &&
+crond -f
+“
+
+volumes:
+mongo_data:
+driver: local
+mongo_config:
+driver: local
+redis_data:
+driver: local
+backend_uploads:
+driver: local
+backend_logs:
+driver: local
+ai_models:
+driver: local
+ai_cache:
+driver: local
+nginx_logs:
+driver: local
+prometheus_data:
+driver: local
+grafana_data:
+driver: local
+
+networks:
+wastesort-network:
+driver: bridge
+ipam:
+config:
+- subnet: 172.20.0.0/16
+
+# Development override file
+
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up

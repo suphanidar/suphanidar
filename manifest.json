@@ -1,0 +1,155 @@
+{
+“short_name”: “WasteSortAI”,
+“name”: “WasteSortAI - ระบบจัดการขยะอัจฉริยะ”,
+“description”: “วิเคราะห์ขยะด้วย AI และ Computer Vision เพื่อการแยกขยะที่ถูกต้อง ช่วยรักษาสิ่งแวดล้อม”,
+“icons”: [
+{
+“src”: “favicon.ico”,
+“sizes”: “64x64 32x32 24x24 16x16”,
+“type”: “image/x-icon”
+},
+{
+“src”: “logo192.png”,
+“type”: “image/png”,
+“sizes”: “192x192”,
+“purpose”: “any maskable”
+},
+{
+“src”: “logo512.png”,
+“type”: “image/png”,
+“sizes”: “512x512”,
+“purpose”: “any maskable”
+},
+{
+“src”: “apple-touch-icon.png”,
+“type”: “image/png”,
+“sizes”: “180x180”,
+“purpose”: “any”
+},
+{
+“src”: “android-chrome-192x192.png”,
+“type”: “image/png”,
+“sizes”: “192x192”,
+“purpose”: “any maskable”
+},
+{
+“src”: “android-chrome-512x512.png”,
+“type”: “image/png”,
+“sizes”: “512x512”,
+“purpose”: “any maskable”
+}
+],
+“start_url”: “./”,
+“display”: “standalone”,
+“display_override”: [“standalone”, “minimal-ui”, “browser”],
+“theme_color”: “#059669”,
+“background_color”: “#ffffff”,
+“orientation”: “portrait-primary”,
+“scope”: “./”,
+“lang”: “th”,
+“dir”: “ltr”,
+“categories”: [“utilities”, “productivity”, “education”],
+“screenshots”: [
+{
+“src”: “screenshot-mobile-1.png”,
+“sizes”: “390x844”,
+“type”: “image/png”,
+“platform”: “narrow”,
+“label”: “Camera view for waste analysis”
+},
+{
+“src”: “screenshot-mobile-2.png”,
+“sizes”: “390x844”,
+“type”: “image/png”,
+“platform”: “narrow”,
+“label”: “Dashboard with user statistics”
+},
+{
+“src”: “screenshot-desktop-1.png”,
+“sizes”: “1280x720”,
+“type”: “image/png”,
+“platform”: “wide”,
+“label”: “Desktop dashboard view”
+}
+],
+“shortcuts”: [
+{
+“name”: “วิเคราะห์ขยะ”,
+“short_name”: “Camera”,
+“description”: “เปิดกล้องเพื่อวิเคราะห์ขยะ”,
+“url”: “./camera”,
+“icons”: [
+{
+“src”: “camera-icon-96.png”,
+“sizes”: “96x96”
+}
+]
+},
+{
+“name”: “ประวัติ”,
+“short_name”: “History”,
+“description”: “ดูประวัติการวิเคราะห์”,
+“url”: “./history”,
+“icons”: [
+{
+“src”: “history-icon-96.png”,
+“sizes”: “96x96”
+}
+]
+},
+{
+“name”: “แดชบอร์ด”,
+“short_name”: “Dashboard”,
+“description”: “ดูสถิติและคะแนน”,
+“url”: “./dashboard”,
+“icons”: [
+{
+“src”: “dashboard-icon-96.png”,
+“sizes”: “96x96”
+}
+]
+}
+],
+“share_target”: {
+“action”: “./share-target”,
+“method”: “POST”,
+“enctype”: “multipart/form-data”,
+“params”: {
+“title”: “title”,
+“text”: “text”,
+“url”: “url”,
+“files”: [
+{
+“name”: “image”,
+“accept”: [“image/*”]
+}
+]
+}
+},
+“protocol_handlers”: [
+{
+“protocol”: “web+wastesort”,
+“url”: “./analyze?url=%s”
+}
+],
+“edge_side_panel”: {
+“preferred_width”: 400
+},
+“launch_handler”: {
+“client_mode”: [“navigate-existing”, “auto”]
+},
+“handle_links”: “preferred”,
+“prefer_related_applications”: false,
+“related_applications”: [
+{
+“platform”: “play”,
+“url”: “https://play.google.com/store/apps/details?id=ai.wastesort.app”,
+“id”: “ai.wastesort.app”
+},
+{
+“platform”: “itunes”,
+“url”: “https://apps.apple.com/app/wastesortai/id123456789”,
+“id”: “123456789”
+}
+]
+}

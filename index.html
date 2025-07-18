@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#059669" />
+    <meta name="description" content="WasteSortAI - ระบบจัดการขยะอัจฉริยะด้วย AI และ Computer Vision สำหรับการแยกขยะอย่างชาญฉลาด" />
+    <meta name="keywords" content="waste sorting, AI, machine learning, recycling, waste management, ขยะ, รีไซเคิล, ปัญญาประดิษฐ์" />
+    <meta name="author" content="WasteSortAI Team" />
+
+```
+<!-- Apple PWA -->
+<link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="WasteSortAI" />
+
+<!-- Microsoft PWA -->
+<meta name="msapplication-TileColor" content="#059669" />
+<meta name="msapplication-config" content="%PUBLIC_URL%/browserconfig.xml" />
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+<!-- Preconnect to external domains -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.dicebear.com">
+<link rel="preconnect" href="https://unpkg.com">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Open Graph Meta Tags -->
+<meta property="og:title" content="WasteSortAI - ระบบจัดการขยะอัจฉริยะ" />
+<meta property="og:description" content="วิเคราะห์ขยะด้วย AI และ Computer Vision เพื่อการแยกขยะที่ถูกต้อง ช่วยรักษาสิ่งแวดล้อม" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://wastesort.ai" />
+<meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+<meta property="og:image:alt" content="WasteSortAI App Screenshot" />
+<meta property="og:locale" content="th_TH" />
+<meta property="og:site_name" content="WasteSortAI" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@wastesortai" />
+<meta name="twitter:creator" content="@wastesortai" />
+<meta name="twitter:title" content="WasteSortAI - ระบบจัดการขยะอัจฉริยะ" />
+<meta name="twitter:description" content="วิเคราะห์ขยะด้วย AI และ Computer Vision เพื่อการแยกขยะที่ถูกต้อง" />
+<meta name="twitter:image" content="%PUBLIC_URL%/twitter-image.png" />
+
+<!-- Additional SEO -->
+<link rel="canonical" href="https://wastesort.ai" />
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+
+<!-- Security Headers -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff" />
+<meta http-equiv="X-Frame-Options" content="DENY" />
+<meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
+<!-- Performance Hints -->
+<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="dns-prefetch" href="//api.dicebear.com" />
+<link rel="dns-prefetch" href="//unpkg.com" />
+
+<title>WasteSortAI - ระบบจัดการขยะอัจฉริยะ</title>
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "WasteSortAI",
+  "description": "ระบบจัดการขยะอัจฉริยะด้วย AI และ Computer Vision",
+  "url": "https://wastesort.ai",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web Browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "THB"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "WasteSortAI Team"
+  },
+  "featureList": [
+    "AI-powered waste detection",
+    "Real-time camera analysis",
+    "Gamification system",
+    "Environmental impact tracking",
+    "Multi-language support"
+  ]
+}
+</script>
+
+<!-- Critical CSS (inline for performance) -->
+<style>
+  /* Critical loading styles */
+  .loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #059669 0%, #0ea5e9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out;
+  }
+  
+  .loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-text {
+    color: white;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 18px;
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  /* Prevent flash of unstyled content */
+  body {
+    font-family: 'Sarabun', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9fafb;
+    overflow-x: hidden;
+  }
+  
+  #root {
+    min-height: 100vh;
+    position: relative;
+  }
+  
+  /* Hide content until React loads */
+  .app-container {
+    opacity: 0;
+    transition: opacity 0.3s ease-in;
+  }
+  
+  .app-container.loaded {
+    opacity: 1;
+  }
+</style>
+```
+
+  </head>
+  <body>
+    <noscript>
+      <div style="text-align: center; padding: 50px; font-family: 'Sarabun', sans-serif;">
+        <h1>เปิดใช้งาน JavaScript</h1>
+        <p>WasteSortAI ต้องการ JavaScript เพื่อทำงาน กรุณาเปิดใช้งาน JavaScript ในเบราว์เซอร์ของคุณ</p>
+        <p>You need to enable JavaScript to run WasteSortAI.</p>
+      </div>
+    </noscript>
+
+```
+<!-- Loading Screen -->
+<div id="loading-screen" class="loading-screen">
+  <div style="text-align: center;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">
+      <div>กำลังโหลด WasteSortAI...</div>
+      <div style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Loading AI Waste Sorting System</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main App Container -->
+<div id="root" class="app-container"></div>
+
+<!-- Service Worker Registration -->
+<script>
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('%PUBLIC_URL%/sw.js')
+        .then((registration) => {
+          console.log('SW registered: ', registration);
+        })
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    });
+  }
+  
+  // Hide loading screen when React loads
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const loadingScreen = document.getElementById('loading-screen');
+      const appContainer = document.querySelector('.app-container');
+      
+      if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        setTimeout(() => {
+          loadingScreen.remove();
+        }, 500);
+      }
+      
+      if (appContainer) {
+        appContainer.classList.add('loaded');
+      }
+    }, 1000); // Minimum loading time for better UX
+  });
+  
+  // Performance monitoring
+  if ('performance' in window) {
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const perfData = performance.getEntriesByType('navigation')[0];
+        if (perfData) {
+          console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+        }
+      }, 0);
+    });
+  }
+  
+  // Error handling
+  window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
+    // Could send to analytics service
+  });
+  
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    // Could send to analytics service
+  });
+</script>
+
+<!-- Critical resource hints -->
+<script>
+  // Preload critical resources
+  const preloadResources = [
+    '/static/js/bundle.js',
+    '/static/css/main.css',
+    '/ai-models/yolov8-waste-model.json'
+  ];
+  
+  preloadResources.forEach(resource => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = resource.endsWith('.js') ? 'script' : 
+               resource.endsWith('.css') ? 'style' : 'fetch';
+    link.href = resource;
+    if (resource.endsWith('.json')) {
+      link.crossOrigin = 'anonymous';
+    }
+    document.head.appendChild(link);
+  });
+</script>
+```
+
+  </body>
+</html>
